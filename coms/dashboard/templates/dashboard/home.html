@@ -6,6 +6,15 @@
     <title>Document</title>
 </head>
 <body>
-    <h1>Home Page</h1>
+
+        {% for post in dashboard %} 
+            <a href="{% url 'post' post.id %}"><h1>{{forloop.counter}} - {{post.title}}</h1></a>
+            <p>{{post.content}}</p>
+
+        {% empty %}
+            <h1>No Post Abailebl</h1>
+        {% endfor %}
+
+
 </body>
 </html>
