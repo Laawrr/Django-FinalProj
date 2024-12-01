@@ -21,4 +21,5 @@ from dashboard import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('post/', include('dashboard.urls')),
+    path('<int:id>/', views.google),
 ]
