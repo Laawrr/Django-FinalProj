@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
+{% extends "global.html" %}
+
+{% block title %}HOME{% endblock title %}
+
+        {% block body %}
 
         {% for post in dashboard %} 
             <a href="{% url 'post' post.id %}"><h1>{{forloop.counter}} - {{post.title}}</h1></a>
@@ -15,6 +12,4 @@
             <h1>No Post Abailebl</h1>
         {% endfor %}
 
-
-</body>
-</html>
+        {% endblock body %}
