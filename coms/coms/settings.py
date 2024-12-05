@@ -37,6 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Tailwind CSS
+    'tailwind',
+    'theme',  # This is the app that will contain your Tailwind CSS configuration
 ]
 
 MIDDLEWARE = [
