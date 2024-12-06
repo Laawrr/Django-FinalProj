@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib import messages
 
 from django.contrib.auth import authenticate, login, logout
@@ -7,7 +7,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 
 # Create your views here.
-from .forms import CreateUserForm
+from .forms import CreateUserForm, ChangeUserForm
 
 def registerPage(request):
     if request.user.is_authenticated:
@@ -25,6 +25,25 @@ def registerPage(request):
 
     context = {'form':form}
     return render(request, 'accounts/register.html', context)
+
+
+@login_required(login_url='login')
+def editPage(request):
+    user = request.user
+    form = ChangeUserForm(instance=user)  
+    if request.method == 'POST':
+        form = ChangeUserForm(request.POST, instance=user)  
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your account has been updated successfully.')
+            return redirect('edit-user')  
+        else:
+            print(form.errors)  
+            messages.error(request, 'There was an error updating your account.')
+
+    context = {'form': form}
+    return render(request, 'accounts/account_center.html', context)
+
 
 def loginPage(request):
     if request.user.is_authenticated:
