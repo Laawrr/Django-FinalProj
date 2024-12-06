@@ -2,5 +2,5 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('post', views.message_app, name='message_app'),  
+    path('', views.landingPage, name='home'),
 ]
