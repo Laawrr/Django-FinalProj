@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Home{% endblock %}
 
 {% block navlinks %}
 
@@ -33,7 +33,7 @@
         through our secure and intuitive messaging platform.
       </p>
       <div class="mt-10 flex justify-center">
-        <a href="#"
+        <a href="{% url 'message_app' %}"
           class="px-8 py-3 bg-indigo-600 text-white text-lg rounded-full hover:bg-indigo-500 transition duration-300 shadow-md hover:shadow-lg flex items-center">
           <svg class="mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
             stroke="currentColor">

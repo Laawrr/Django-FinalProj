@@ -1,10 +1,8 @@
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
+@login_required(login_url='login')
 def message_app(request):
-    # Add any context data if needed, e.g., existing messages
-    context = {
-        "username": "Lawrence",  # Replace with actual username if user authentication is integrated
-        # Example: 'messages': [{'text': 'Hello World', 'timestamp': '10:00 AM'}]
-    }
+    context = {}
     return render(request, 'messages.html', context)
