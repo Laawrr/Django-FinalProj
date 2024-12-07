@@ -28,7 +28,7 @@
     <div id="messageContainer" class="flex-grow overflow-y-auto p-4 space-y-4">
       <!-- Messages will be dynamically added here -->
       {% for message in messages %}
-      <div class="message p-2 border-b">
+      <div class="message p-2 border-b {% if message.user == user %}text-right{% else %}text-left{% endif %}">
         <strong>{{ message.user.username }}:</strong>
         <p>{{ message.content }}</p>
         <span class="text-gray-500 text-xs">{{ message.timestamp }}</span>
@@ -48,6 +48,9 @@
 </main>
 
 <script>
+  // Pass the current user from Django to JavaScript
+  const currentUser = "{{ user.username }}";
+
   // For profile dropdown
   document.getElementById('userDropdown').addEventListener('click', function () {
     const userMenu = document.getElementById('userMenu');
@@ -71,6 +74,14 @@
         data.messages.forEach(message => {
           const messageElement = document.createElement('div');
           messageElement.classList.add('message', 'p-2', 'border-b');
+          
+          // Align messages based on user
+          if (message.username === currentUser) {
+            messageElement.classList.add('text-right');
+          } else {
+            messageElement.classList.add('text-left');
+          }
+
           messageElement.innerHTML = `
             <strong>${message.username}:</strong>
             <p>${message.content}</p>
