@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block navlinks %}
+
+{% if login_url == 'login' %}
+<div class="flex items-center space-x-4">
+  <a href="{% url 'logout' %}" class="text-gray-600 hover:text-indigo-600 transition duration-300">LogOut</a>
+</div>
+
+{% else %}
+<div class="flex items-center space-x-4">
+  <a href="/login" class="text-gray-600 hover:text-indigo-600 transition duration-300">Login</a>
+  <a href="/register"
+    class="px-4 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-500 transition duration-300 shadow-md hover:shadow-lg">Register</a>
+</div>
+
+{% endif %}
+
+{% endblock %}
+
+{% block body %}
+  <!-- Main Content -->
+  <main class="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16">
+    <div class="max-w-4xl mx-auto text-center">
+      <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
+        <span class="block text-indigo-600">Connect Instantly</span>
+        <span class="block">with MessageHub</span>
+      </h1>
+      <p class="mt-6 text-xl text-gray-500 max-w-3xl mx-auto">
+        Experience seamless communication with friends, family, and colleagues
+        through our secure and intuitive messaging platform.
+      </p>
+      <div class="mt-10 flex justify-center">
+        <a href="#"
+          class="px-8 py-3 bg-indigo-600 text-white text-lg rounded-full hover:bg-indigo-500 transition duration-300 shadow-md hover:shadow-lg flex items-center">
+          <svg class="mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M8 10h.01M12 10h.01M16 10h.01M9 16h6m-7.62-3.78a4.992 4.992 0 011.025-5.528 4.992 4.992 0 015.156-1.089m.244 1.162a5.007 5.007 0 014.931 5.394 5.007 5.007 0 01-5.394 4.931" />
+          </svg>
+          Get Started
+        </a>
+      </div>
+    </div>
+  </main>
+{% endblock %}
