@@ -7,11 +7,11 @@ from .models import Message
 @login_required(login_url='login')
 def message_app(request):
     form = MessageForm()
+    messages = Message.objects.all().order_by('timestamp')  # Fetch messages for the template
 
     if request.method == 'POST':
         form = MessageForm(request.POST)
         if form.is_valid():
-            # Assign the current logged-in user to the message before saving
             message = form.save(commit=False)
             message.user = request.user
             message.save()
@@ -24,8 +24,8 @@ def message_app(request):
         else:
             return JsonResponse({'success': False, 'message': 'Failed to send message'}, status=400)
 
-    # On initial load, return the message form and an empty message list
-    return render(request, 'messages.html', {'form': form})
+    return render(request, 'messages.html', {'form': form, 'messages': messages})
+
 
 @login_required(login_url='login')
 def get_messages(request):
