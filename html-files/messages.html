@@ -72,9 +72,43 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="flex-grow flex items-center justify-center p-4">
+    <main class="flex-grow flex flex-col md:flex-row p-4 gap-4">
+      <!-- Left Sidebar - User List (Hidden on small screens) -->
       <div
-        class="bg-white shadow-md rounded-lg w-full max-w-xs sm:max-w-sm md:max-w-md h-[80vh] flex flex-col"
+        class="hidden md:block w-full md:w-1/3 bg-white shadow-md rounded-lg overflow-hidden"
+      >
+        <div class="p-4 border-b">
+          <h2 class="text-lg font-semibold">Users</h2>
+          <div class="mt-2 relative">
+            <input
+              type="text"
+              placeholder="Search..."
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+            <i class="lucide-search absolute right-3 top-2.5 text-gray-400"></i>
+          </div>
+        </div>
+        <div class="overflow-y-auto h-[calc(100vh-16rem)]">
+          <!-- Blank user list items -->
+          <div class="p-4 border-b hover:bg-gray-50 cursor-pointer">
+            <div class="flex items-center">
+              <img
+                src="/placeholder.svg"
+                alt="USER1"
+                class="w-10 h-10 rounded-full mr-3"
+              />
+              <div>
+                <h3 class="font-semibold text-gray-500">---</h3>
+                <p class="text-sm text-gray-400">---</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Side - Chat Area -->
+      <div
+        class="w-full md:w-2/3 bg-white shadow-md rounded-lg flex flex-col h-[calc(100vh-10rem)] sm:h-[calc(100vh-12rem)] md:h-[calc(100vh-8rem)]"
       >
         <div class="flex-grow overflow-y-auto p-4 space-y-4">
           <!-- Messages will be dynamically added here -->
@@ -98,8 +132,8 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-50 border-t">
-      <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <footer class="bg-gray-50 border-t mt-auto">
+      <div class="container mx-auto py-4 px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col md:flex-row justify-between items-center">
           <div class="mb-4 md:mb-0">
             <p class="text-sm text-gray-500">
