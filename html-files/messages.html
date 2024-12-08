@@ -188,5 +188,23 @@
         </div>
       </div>
     </footer>
+    <script>
+      // Toggle user menu
+      const userDropdown = document.getElementById("userDropdown");
+      const userMenu = document.getElementById("userMenu");
+      userDropdown.addEventListener("click", () => {
+        userMenu.classList.toggle("hidden");
+      });
+
+      // Close the menu when clicking outside
+      document.addEventListener("click", (event) => {
+        if (
+          !userDropdown.contains(event.target) &&
+          !userMenu.contains(event.target)
+        ) {
+          userMenu.classList.add("hidden");
+        }
+      });
+    </script>
   </body>
 </html>
