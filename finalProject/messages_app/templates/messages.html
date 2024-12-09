@@ -22,31 +22,6 @@
 {% endblock %}
 
 {% block body %}
-<!-- Main Content
-<main class="flex-grow flex items-center justify-center p-4">
-  <div class="bg-white shadow-md rounded-lg w-full max-w-xs sm:max-w-sm md:max-w-md h-[80vh] flex flex-col">
-    <div id="messageContainer" class="flex-grow overflow-y-auto p-4 space-y-4">
-      Messages will be dynamically added here
-      {% for message in messages %}
-      <div class="message p-2 border-b {% if message.user == user %}text-right{% else %}text-left{% endif %}">
-        <strong>{{ message.user.username }}:</strong>
-        <p>{{ message.content }}</p>
-        <span class="text-gray-500 text-xs">{{ message.timestamp }}</span>
-      </div>
-      {% endfor %}
-    </div>
-    <div class="p-4 border-t">
-      <form id="messageForm" class="flex space-x-2" method="POST" action="{% url 'message_app' %}">
-        {% csrf_token %}
-        {{ form.content }}
-        <button type="submit" class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-          Send
-        </button>
-      </form>
-    </div>
-  </div>
-</main> -->
-
 <!-- Main Content -->
 <main class="flex-grow flex flex-col md:flex-row p-4 gap-4">
   <!-- Left Sidebar - User List (Hidden on small screens) -->
@@ -76,8 +51,11 @@
   <!-- Right Side - Chat Area -->
   <div
     class="w-full md:w-2/3 bg-white shadow-md rounded-lg flex flex-col h-[calc(100vh-10rem)] sm:h-[calc(100vh-12rem)] md:h-[calc(100vh-8rem)]">
-    <div class="flex-grow overflow-y-auto p-4 space-y-4">
-      <!-- Messages will be dynamically added here -->
+    <div id="messageContainer" class="flex-grow overflow-y-auto p-4 space-y-4">
+      <!-- Messages will be dynamically loaded here -->
+      {% if not messages %}
+      <p class="text-gray-500 text-center">No messages yet. Start the conversation!</p>
+      {% else %}
       {% for message in messages %}
       <div class="message p-2 border-b {% if message.user == user %}text-right{% else %}text-left{% endif %}">
         <strong>{{ message.user.username }}:</strong>
@@ -85,6 +63,7 @@
         <span class="text-gray-500 text-xs">{{ message.timestamp }}</span>
       </div>
       {% endfor %}
+      {% endif %}
     </div>
     <div class="p-4 border-t">
       <form id="messageForm" class="flex space-x-2" method="POST" action="{% url 'message_app' %}">
@@ -99,45 +78,41 @@
   </div>
 </main>
 
-
-
 <script>
-  // Pass the current user from Django to JavaScript
   const currentUser = "{{ user.username }}";
 
-  // For profile dropdown
+  // Toggle user menu visibility
   document.getElementById('userDropdown').addEventListener('click', function () {
-    const userMenu = document.getElementById('userMenu');
-    userMenu.classList.toggle('hidden');
+    document.getElementById('userMenu').classList.toggle('hidden');
   });
 
   // Fetch messages when the page loads
-  window.addEventListener('DOMContentLoaded', function () {
-    fetchMessages();
-  });
+  window.addEventListener('DOMContentLoaded', fetchMessages);
 
-  // Function to fetch messages from the server
+  // Fetch messages from the server
   function fetchMessages() {
-    fetch('get_messages/')  // Adjust this URL if necessary
+    fetch('{% url "get_messages" %}')
+      .then(response => response.text()) // Use .text() to inspect the raw response
+      .then(data => console.log(data))   // Log the raw data
+
+
       .then(response => response.json())
       .then(data => {
+        
         const messageContainer = document.getElementById('messageContainer');
-        messageContainer.innerHTML = ''; // Clear existing messages (if any)
+        messageContainer.innerHTML = ''; // Clear existing messages
 
-        // Append all messages in order from oldest to newest
+        if (data.messages.length === 0) {
+          messageContainer.innerHTML = '<p class="text-gray-500 text-center">No messages yet. Start the conversation!</p>';
+          return;
+        }
+
         data.messages.forEach(message => {
           const messageElement = document.createElement('div');
-          messageElement.classList.add('message', 'p-2', 'border-b');
-
-          // Align messages based on user
-          if (message.username === currentUser) {
-            messageElement.classList.add('text-right');
-          } else {
-            messageElement.classList.add('text-left');
-          }
+          messageElement.classList.add('message', 'p-2', 'border-b', message.username === currentUser ? 'text-right' : 'text-left');
 
           messageElement.innerHTML = `
-            <strong>${message.username}</strong>
+            <strong>${message.username}:</strong>
             <p>${message.content}</p>
             <span class="text-gray-500 text-xs">${message.timestamp}</span>
           `;
@@ -163,7 +138,7 @@
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          fetchMessages();  // Fetch all messages again after a new one is sent
+          fetchMessages();  // Refresh messages
           form.reset();  // Clear the form
         }
       })
