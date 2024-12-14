@@ -88,27 +88,26 @@
       fetch("{% url 'message-api' %}")
         .then(response => response.json())
         .then(data => {
-          console.log(data);  // Log the data to inspect the structure
+
+          // Extract the decrypted content array
+          const messages = Array.isArray(data.decrypted_content) ? data.decrypted_content : [];
+
           const messageContainer = document.getElementById("messageContainer");
-          if (Array.isArray(data)) {  // Ensure data is an array
-            if (data.length === 0) {
-              messageContainer.innerHTML = "<p class='text-gray-500 text-center'>No messages yet. Start the conversation!</p>";
-            } else {
-              messageContainer.innerHTML = "";
-              data.forEach(message => {
-                const messageElement = document.createElement("div");
-                messageElement.classList.add("message", "p-2", "border-b", message.user === '{{ user.username }}' ? 'text-right' : 'text-left');
-                messageElement.innerHTML = `
-              <strong>${message.user}:</strong>
-              <p>${message.content}</p>
-              <span class="text-gray-500 text-xs">${message.timestamp}</span>
-            `;
-                messageContainer.appendChild(messageElement);
-              });
-            }
+
+          if (messages.length === 0) {
+            messageContainer.innerHTML = "<p class='text-gray-500 text-center'>No messages yet. Start the conversation!</p>";
           } else {
-            console.error('Expected array, but got:', data);
-            messageContainer.innerHTML = "<p class='text-gray-500 text-center'>Error fetching messages. Please try again later.</p>";
+            messageContainer.innerHTML = "";  // Clear existing messages
+            messages.forEach(message => {
+              const messageElement = document.createElement("div");
+              messageElement.classList.add("message", "p-2", "border-b", message.user === '{{ user.username }}' ? 'text-right' : 'text-left');
+              messageElement.innerHTML = `
+            <strong>${message.user}:</strong>
+            <p>${message.content}</p>
+            <span class="text-gray-500 text-xs">${message.timestamp}</span>
+          `;
+              messageContainer.appendChild(messageElement);
+            });
           }
 
           // Scroll to the bottom of the message container after updating messages
@@ -142,7 +141,7 @@
       })
         .then(response => response.json())
         .then(data => {
-          console.log('Message sent:', data);
+          // console.log('Message sent:', data);
           fetchMessages();  // Fetch updated messages
           // Clear the input field after sending the message
           document.querySelector('input[name="content"]').value = '';

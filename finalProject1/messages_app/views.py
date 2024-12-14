@@ -16,12 +16,23 @@ def message_app(request):
 def message_api(request):
     try:
         if request.method == 'GET':
-            # Decrypted content is now stored in request.decrypted_contents by the middleware
+            # # Decrypted content is now stored in request.decrypted_contents by the middleware
+            messages = Message.objects.all()
+            serializer = MessageSerializer(messages, many=True)
+            print(messages)
             decrypted_contents = getattr(request, 'decrypted_contents', None)
             
             if decrypted_contents:
                 # Return the decrypted contents as a response
-                return Response({'decrypted_content': decrypted_contents}, status=status.HTTP_200_OK)
+                decrypted_messages = [
+                {
+                    'user': message['user'],
+                    'content': decrypted_contents[i], 
+                    'timestamp': message['timestamp']
+                }
+                for i, message in enumerate(serializer.data)
+            ]
+                return Response({'decrypted_content': decrypted_messages}, status=status.HTTP_200_OK)
             else:
                 return Response({'error': 'No decrypted content found'}, status=status.HTTP_404_NOT_FOUND)
 
