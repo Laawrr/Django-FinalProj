@@ -11,6 +11,7 @@ from .serializers import MessageSerializer
 def message_app(request):
     return render(request, 'messages.html')
 
+@login_required(login_url='login')
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def message_api(request):

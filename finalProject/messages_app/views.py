@@ -3,7 +3,6 @@ from django.contrib.auth.decorators import login_required
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.pagination import PageNumberPagination
 from rest_framework import status
 from .models import Message
 from .serializers import MessageSerializer
@@ -12,18 +11,31 @@ from .serializers import MessageSerializer
 def message_app(request):
     return render(request, 'messages.html')
 
+@login_required(login_url='login')
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def message_api(request):
     try:
         if request.method == 'GET':
-            # Get all messages ordered by timestamp, and paginate the results
-            messages = Message.objects.all().order_by('timestamp')
-            paginator = PageNumberPagination()
-            paginator.page_size = 10  # Adjust page size if needed
-            result_page = paginator.paginate_queryset(messages, request)
-            serializer = MessageSerializer(result_page, many=True)
-            return paginator.get_paginated_response(serializer.data)
+            # # Decrypted content is now stored in request.decrypted_contents by the middleware
+            messages = Message.objects.all()
+            serializer = MessageSerializer(messages, many=True)
+            print(messages)
+            decrypted_contents = getattr(request, 'decrypted_contents', None)
+            
+            if decrypted_contents:
+                # Return the decrypted contents as a response
+                decrypted_messages = [
+                {
+                    'user': message['user'],
+                    'content': decrypted_contents[i], 
+                    'timestamp': message['timestamp']
+                }
+                for i, message in enumerate(serializer.data)
+            ]
+                return Response({'decrypted_content': decrypted_messages}, status=status.HTTP_200_OK)
+            else:
+                return Response({'error': 'No decrypted content found'}, status=status.HTTP_404_NOT_FOUND)
 
         elif request.method == 'POST':
             # Handle POST request to create a new message
@@ -39,9 +51,6 @@ def message_api(request):
         else:
             return Response({'error': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    except Message.DoesNotExist:
-        # Handle case where the message doesn't exist (in case you extend the code later)
-        return Response({'error': 'Message not found'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         # Handle other unexpected errors
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
