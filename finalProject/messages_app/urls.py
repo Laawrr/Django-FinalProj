@@ -3,5 +3,5 @@ from . import views
 
 urlpatterns = [
     path('', views.message_app, name='message_app'),
-    path('get_messages/', views.get_messages, name='get_messages'),
+    path('api/messages/', views.message_api, name='message-api'),
 ]

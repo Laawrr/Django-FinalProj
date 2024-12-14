@@ -22,9 +22,7 @@
 {% endblock %}
 
 {% block body %}
-<!-- Main Content -->
 <main class="flex-grow flex flex-col md:flex-row p-4 gap-4">
-  <!-- Left Sidebar - User List (Hidden on small screens) -->
   <div class="hidden md:block w-full md:w-1/3 bg-white shadow-md rounded-lg overflow-hidden">
     <div class="p-4 border-b">
       <h2 class="text-lg font-semibold">{{ user.username }}</h2>
@@ -35,7 +33,6 @@
       </div>
     </div>
     <div class="overflow-y-auto h-[calc(100vh-16rem)]">
-      <!-- Blank user list items -->
       <div class="p-4 border-b hover:bg-gray-50 cursor-pointer">
         <div class="flex items-center">
           <img src="" alt="user-profile" class="w-10 h-10 rounded-full mr-3" />
@@ -48,29 +45,25 @@
     </div>
   </div>
 
-  <!-- Right Side - Chat Area -->
-  <div
-    class="w-full md:w-2/3 bg-white shadow-md rounded-lg flex flex-col h-[calc(100vh-10rem)] sm:h-[calc(100vh-12rem)] md:h-[calc(100vh-8rem)]">
+  <div class="w-full md:w-2/3 bg-white shadow-md rounded-lg flex flex-col h-[calc(100vh-10rem)] sm:h-[calc(100vh-12rem)] md:h-[calc(100vh-8rem)]">
     <div id="messageContainer" class="flex-grow overflow-y-auto p-4 space-y-4">
-      <!-- Messages will be dynamically loaded here -->
       {% if not messages %}
-      <p class="text-gray-500 text-center">No messages yet. Start the conversation!</p>
+        <p class="text-gray-500 text-center">No messages yet. Start the conversation!</p>
       {% else %}
-      {% for message in messages %}
-      <div class="message p-2 border-b {% if message.user == user %}text-right{% else %}text-left{% endif %}">
-        <strong>{{ message.user.username }}:</strong>
-        <p>{{ message.content }}</p>
-        <span class="text-gray-500 text-xs">{{ message.timestamp }}</span>
-      </div>
-      {% endfor %}
+        {% for message in messages %}
+          <div class="message p-2 border-b {% if message.user == user %}text-right{% else %}text-left{% endif %}">
+            <strong>{{ message.user.username }}:</strong>
+            <p>{{ message.content }}</p>
+            <span class="text-gray-500 text-xs">{{ message.timestamp }}</span>
+          </div>
+        {% endfor %}
       {% endif %}
     </div>
     <div class="p-4 border-t">
-      <form id="messageForm" class="flex space-x-2" method="POST" action="{% url 'message_app' %}">
+      <form id="messageForm" class="flex space-x-2" method="POST" action="{% url 'message-api' %}">
         {% csrf_token %}
-        {{ form.content }}
-        <button type="submit"
-          class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+        <input type="text" name="content" class="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Type a message..." />
+        <button type="submit" class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
           <span class="text-sm">Send</span>
         </button>
       </form>
@@ -81,7 +74,6 @@
 <script>
   const currentUser = "{{ user.username }}";
 
-  // Toggle user menu visibility
   document.getElementById('userDropdown').addEventListener('click', function () {
     document.getElementById('userMenu').classList.toggle('hidden');
   });
@@ -89,43 +81,40 @@
   // Fetch messages when the page loads
   window.addEventListener('DOMContentLoaded', fetchMessages);
 
-  // Fetch messages from the server
   function fetchMessages() {
-    fetch('{% url "get_messages" %}')
-      .then(response => response.text()) // Use .text() to inspect the raw response
-      .then(data => console.log(data))   // Log the raw data
+    fetch("{% url 'message-api' %}", {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('token')  // assuming token is stored in localStorage
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      const messageContainer = document.getElementById('messageContainer');
+      messageContainer.innerHTML = ''; // Clear existing messages
 
+      if (data.results.length === 0) {
+        messageContainer.innerHTML = '<p class="text-gray-500 text-center">No messages yet. Start the conversation!</p>';
+        return;
+      }
 
-      .then(response => response.json())
-      .then(data => {
-        
-        const messageContainer = document.getElementById('messageContainer');
-        messageContainer.innerHTML = ''; // Clear existing messages
+      data.results.forEach(message => {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message', 'p-2', 'border-b', message.user.username === currentUser ? 'text-right' : 'text-left');
+        messageElement.innerHTML = `
+          <strong>${message.user.username}:</strong>
+          <p>${message.content}</p>
+          <span class="text-gray-500 text-xs">${message.timestamp}</span>
+        `;
+        messageContainer.appendChild(messageElement);
+      });
 
-        if (data.messages.length === 0) {
-          messageContainer.innerHTML = '<p class="text-gray-500 text-center">No messages yet. Start the conversation!</p>';
-          return;
-        }
-
-        data.messages.forEach(message => {
-          const messageElement = document.createElement('div');
-          messageElement.classList.add('message', 'p-2', 'border-b', message.username === currentUser ? 'text-right' : 'text-left');
-
-          messageElement.innerHTML = `
-            <strong>${message.username}:</strong>
-            <p>${message.content}</p>
-            <span class="text-gray-500 text-xs">${message.timestamp}</span>
-          `;
-          messageContainer.appendChild(messageElement);
-        });
-
-        // Scroll to the bottom of the message container
-        messageContainer.scrollTop = messageContainer.scrollHeight;
-      })
-      .catch(error => console.error('Error fetching messages:', error));
+      messageContainer.scrollTop = messageContainer.scrollHeight;  // Scroll to the bottom
+    })
+    .catch(error => console.error('Error fetching messages:', error));
   }
 
-  // Handle form submission
   document.getElementById('messageForm').addEventListener('submit', function (event) {
     event.preventDefault();
     const form = event.target;
@@ -135,14 +124,15 @@
       method: 'POST',
       body: formData,
     })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          fetchMessages();  // Refresh messages
-          form.reset();  // Clear the form
-        }
-      })
-      .catch(error => console.error('Error sending message:', error));
+    .then(response => response.json())
+    .then(data => {
+      if (data) {
+        fetchMessages();  // Refresh messages
+        form.reset();  // Clear the form
+      }
+    })
+    .catch(error => console.error('Error sending message:', error));
   });
 </script>
+
 {% endblock %}
