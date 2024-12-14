@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock title %} - MessageHub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css" rel="stylesheet" />
+</head>
+
+<body class="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+
+    {% include "navbar.html" %}
+    {% block navlinks %}
+    {% endblock %}
+    </div>
+    </div>
+    </nav>
+
+    {% block body %}
+    {% endblock %}
+
+    {% include "footer.html" %}
+</body>
+
+</html>

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block navlinks %}
+<div class="flex items-center space-x-4">
+  <span class="text-sm text-gray-500">Don't have an account?</span>
+  <a href="{% url 'register' %}"
+    class="px-4 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-500 transition duration-300 shadow-md hover:shadow-lg">
+    Register
+  </a>
+</div>
+{% endblock %}
+
+{% block body %}
+<main class="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16">
+  <div class="bg-white shadow-md rounded-lg w-full max-w-md">
+    <div class="px-6 py-8">
+      <h1 class="text-3xl font-extrabold text-gray-900 text-center mb-6">
+        Sign In
+      </h1>
+      <form class="space-y-6" method="POST" action="">
+        {% csrf_token %}
+        <div>
+          <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+          <input id="username" name="username" type="text" autocomplete="username" required
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
+        </div>
+
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" required
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
+        </div>
+
+        {% for message in messages %}
+        <p id="messages">{{ message }}</p>
+        {% endfor %}
+
+        <div>
+          <input type="submit" value="Sign in"
+            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300">
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
+{% endblock %}
