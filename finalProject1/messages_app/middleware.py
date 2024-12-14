@@ -6,7 +6,7 @@ import json
 
 class EncryptionMiddleware:
     """
-    Middleware to encrypt API responses and decrypt incoming request bodies for JSON data.
+    Middleware to encrypt the 'content' field in POST request bodies and decrypt it in GET request bodies.
     """
 
     def __init__(self, get_response):
@@ -14,44 +14,54 @@ class EncryptionMiddleware:
         self.cipher = Fernet(settings.ENCRYPT_KEY)  # Ensure ENCRYPT_KEY is configured in your settings.py
 
     def __call__(self, request):
-        # Decrypt incoming request body if it's a POST or PUT request and the content is encrypted
-        if request.method in ('POST', 'PUT') and request.content_type == 'application/json':
-            try:
-                if request.body:  # Only attempt decryption if there is a body
-                    print(f"Raw request body: {request.body}")  # Debugging log
-                    decrypted_body = self.cipher.decrypt(request.body)  # Keep it as bytes
-                    decrypted_body = decrypted_body.decode('utf-8')  # Decode to string after decryption
-                    print(f"Decrypted body: {decrypted_body}")  # Debugging log
+        # Debugging log to see the request method
+        print(f"Request Method: {request.method}")
 
-                    # Check if decrypted data is valid JSON
-                    try:
-                        parsed_data = json.loads(decrypted_body)
-                        request._body = decrypted_body  # Replace the raw body with the decrypted body
-                        setattr(request, 'parsed_data', parsed_data)  # Add parsed data to the request object
-                        print(f"Decrypted and parsed data: {request.parsed_data}")  # Debugging log
-                    except json.JSONDecodeError:
-                        raise ValidationError(f"Decrypted data is not valid JSON. Received: {decrypted_body}")
+        if request.method == 'POST':
+            print(f"Entered POST request block")
+            try:
+                if request.body:  # Only attempt encryption if there is a body
+                    print(f"Raw request body: {request.body}")
+
+                    # Parse the incoming JSON body
+                    parsed_data = json.loads(request.body.decode('utf-8'))
+
+                    # Check if 'content' key exists
+                    if 'content' in parsed_data:
+                        # Encrypt the 'content' field
+                        original_content = parsed_data['content']
+                        encrypted_content = self.cipher.encrypt(original_content.encode('utf-8'))  # Encrypt content
+                        parsed_data['content'] = encrypted_content.decode('utf-8')  # Replace content with encrypted version
+                        print(f"Encrypted content: {parsed_data['content']}")
+
+                    # Reassign the modified body back to the request using _body (a mutable version of body)
+                    request._body = json.dumps(parsed_data).encode('utf-8')
+            except Exception as e:
+                print(f"Encryption error during request: {e}")
+                return self._error_response(f"Encryption error during request: {e}")
+
+        elif request.method == 'GET':
+            print(f"Entered GET request block")
+            try:
+                # Check if 'content' is in the query parameters
+                if 'content' in request.GET:
+                    encrypted_content = request.GET['content']
+                    print(f"Encrypted content from query: {encrypted_content}")
+
+                    # Decrypt the 'content' field
+                    decrypted_content = self.cipher.decrypt(encrypted_content.encode('utf-8')).decode('utf-8')
+                    print(f"Decrypted content: {decrypted_content}")
+
+                    # You can now use decrypted_content in your view logic if needed
+                    # Optionally, you can add the decrypted content back to the request or response
+                    request.decrypted_content = decrypted_content  # Add to the request object for use in the view
+
             except Exception as e:
                 print(f"Decryption error: {e}")
                 return self._error_response(f"Decryption error: {e}")
 
         # Get the response (Django renders the response here)
         response = self.get_response(request)
-
-        # Encrypt response body if it's JSON
-        if response['Content-Type'] == 'application/json':
-            try:
-                original_content = response.content.decode('utf-8')
-                print(f"Original response content: {original_content}")  # Debugging log
-
-                # Encrypt the entire response content (ensure it's in bytes)
-                encrypted_content = self.cipher.encrypt(original_content.encode('utf-8'))  # Convert to bytes
-                response.content = encrypted_content
-                response['Content-Type'] = 'application/octet-stream'  # Change content type for encrypted data
-                print(f"Encrypted response content: {response.content}")  # Debugging log
-            except Exception as e:
-                print(f"Encryption error during response: {e}")
-                return self._error_response(f"Encryption error: {e}")
 
         return response
 
