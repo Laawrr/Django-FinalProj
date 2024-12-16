@@ -6,4 +6,3 @@ class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = ['user', 'content', 'timestamp']
-        read_only_fields = ['user', 'content', 'timestamp']  

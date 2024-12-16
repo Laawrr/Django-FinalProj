@@ -17,40 +17,39 @@ def message_app(request):
 def message_api(request):
     try:
         if request.method == 'GET':
-            # # Decrypted content is now stored in request.decrypted_contents by the middleware
+            # Fetch all messages from the database
             messages = Message.objects.all()
             serializer = MessageSerializer(messages, many=True)
-            print(messages)
+
+            # Retrieve decrypted contents from middleware
             decrypted_contents = getattr(request, 'decrypted_contents', None)
-            
-            if decrypted_contents:
-                # Return the decrypted contents as a response
-                decrypted_messages = [
+            if decrypted_contents is None or len(decrypted_contents) != len(serializer.data):
+                return Response({'error': 'Decryption failed or mismatch in data lengths'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Combine serialized data with decrypted contents
+            decrypted_messages = [
                 {
                     'user': message['user'],
-                    'content': decrypted_contents[i], 
+                    'content': decrypted_contents[i],
                     'timestamp': message['timestamp']
                 }
                 for i, message in enumerate(serializer.data)
             ]
-                return Response({'decrypted_content': decrypted_messages}, status=status.HTTP_200_OK)
-            else:
-                return Response({'error': 'No decrypted content found'}, status=status.HTTP_404_NOT_FOUND)
+            print("Serialized data length:", len(serializer.data))
+            print("Decrypted contents length:", len(request.decrypted_contents))
+            return Response({'decrypted_content': decrypted_messages}, status=status.HTTP_200_OK)
 
         elif request.method == 'POST':
-            # Handle POST request to create a new message
+            # Save the serialized data
             serializer = MessageSerializer(data=request.data)
+            print("asd:",serializer)
             if serializer.is_valid():
-                # Associate the message with the current user
                 serializer.save(user=request.user)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        # Handle method not allowed for other HTTP methods
         else:
             return Response({'error': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     except Exception as e:
-        # Handle other unexpected errors
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

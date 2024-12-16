@@ -1,7 +1,7 @@
 from cryptography.fernet import Fernet
 from rest_framework.response import Response
 from django.conf import settings
-from django.http import QueryDict
+from django.http import QueryDict, JsonResponse
 from .models import Message
 from .serializers import MessageSerializer
 import json
@@ -13,32 +13,45 @@ class EncryptionMiddleware:
     """
     def __init__(self, get_response):
         self.get_response = get_response
-        self.cipher = Fernet(settings.ENCRYPT_KEY)  
+        self.cipher = Fernet(settings.ENCRYPT_KEY)
 
     def __call__(self, request):
         if request.method == 'POST':
             request = self._encrypt_post_content(request)
+            # If an error response is returned, exit middleware
+            if isinstance(request, JsonResponse):
+                return request
         elif request.method == 'GET':
             request = self._decrypt_get_content(request)
-        
+            # If an error response is returned, exit middleware
+            if isinstance(request, JsonResponse):
+                return request
+
         # Process the response
         response = self.get_response(request)
         return response
 
     def _encrypt_post_content(self, request):
         try:
-            # Parse incoming POST body
+            # Check if the request body is empty
+            if not request.body.strip():
+                return request  # Continue without encryption if no body is present
+            print("Original body:", request.body)
             parsed_data = json.loads(request.body.decode('utf-8'))
             if 'content' in parsed_data:
-                original_content = parsed_data['content']
-                # Encrypt 'content' and replace it
-                encrypted_content = self.cipher.encrypt(original_content.encode('utf-8'))
-                parsed_data['content'] = encrypted_content.decode('utf-8')
-
-                # Update request body
+                parsed_data['content'] = self.cipher.encrypt(parsed_data['content'].encode('utf-8')).decode('utf-8')
                 request._body = json.dumps(parsed_data).encode('utf-8')
+                request._full_data = parsed_data
+            
+            print("Modified body:", request.body)
+
+        except json.JSONDecodeError:
+            # Skip encryption for malformed or non-JSON payloads
+            pass
         except Exception as e:
-            return self._error_response(f"Encryption error: {e}")
+            # Log unexpected errors (optional) and continue
+            print(f"Unexpected error during encryption: {e}")
+        
         return request
 
     def _decrypt_get_content(self, request):
@@ -53,16 +66,21 @@ class EncryptionMiddleware:
             for message in serializer.data:
                 encrypted_content = message.get('content')
                 if encrypted_content:
-                    # Decrypt the content
-                    decrypted_content = self.cipher.decrypt(encrypted_content.encode('utf-8')).decode('utf-8')
-                    decrypted_contents.append(decrypted_content)
-            
+                    try: # Decrypt the content
+                        decrypted_content = self.cipher.decrypt(encrypted_content.encode('utf-8')).decode('utf-8')
+                        decrypted_contents.append(decrypted_content)
+                    except Exception as e:
+                        print(f"Decryption failed for message {message['id']}: {e}")
+                else:
+                    decrypted_contents.append(None) 
             # Store decrypted content in request for use in views
             request.decrypted_contents = decrypted_contents  # Store in request object
+            print("Middleware decrypted contents:", decrypted_contents) 
             
         except Exception as e:
-            return self._error_response(f"Decryption error: {e}")
+            print("Middleware decryption error:", e)  # Debugging
+            request.decrypted_contents = None
         return request
 
     def _error_response(self, message):
-        return Response({'success': False, 'error': message}, status=400)
+        return JsonResponse({'success': False, 'error': message}, status=400)
