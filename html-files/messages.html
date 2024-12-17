@@ -67,7 +67,7 @@
         </div>
         <div class="overflow-y-auto">
           <!-- User list item -->
-          <div class="p-4 hover:bg-gray-100 cursor-pointer">
+          <div class="p-4 hover:bg-gray-100 cursor-pointer user-item">
             <div class="flex items-center">
               <img
                 src="/placeholder.svg"
@@ -153,6 +153,19 @@
         ) {
           userList.classList.add("-translate-x-full");
         }
+      });
+
+      // New code: Handle user item clicks on small screens
+      const userItems = document.querySelectorAll(".user-item");
+      userItems.forEach((item) => {
+        item.addEventListener("click", () => {
+          const isSmallScreen = window.innerWidth < 768; // md breakpoint
+          if (isSmallScreen) {
+            userList.classList.add("-translate-x-full");
+            // You can add additional logic here to load the messages for the clicked user
+            console.log("User clicked, navigate to messages");
+          }
+        });
       });
     </script>
   </body>

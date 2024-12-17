@@ -47,11 +47,13 @@
 
     <!-- Main Content -->
     <main
-      class="flex-grow flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-12"
+      class="flex-grow flex items-center justify-center px-4 sm:px-6 lg:px-8 h-full overflow-hidden"
     >
-      <div class="container mx-auto max-w-md relative">
-        <div class="bg-white shadow-md rounded-lg p-8">
-          <h1 class="mb-6 text-center text-3xl font-extrabold text-gray-900">
+      <div class="container mx-auto max-w-md h-auto">
+        <!-- Adjust max-w-md to control width -->
+        <div class="bg-white shadow-md rounded-lg p-8 overflow-hidden">
+          <!-- Prevent overflow -->
+          <h2 class="mb-6 text-center text-3xl font-extrabold text-gray-900">
             Account Center
           </h1>
           <form id="accountForm" class="space-y-4">
