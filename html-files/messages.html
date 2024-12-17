@@ -10,14 +10,10 @@
       rel="stylesheet"
     />
   </head>
-  <body
-    class="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50"
-  >
+  <body class="flex flex-col min-h-screen bg-gray-50">
     <!-- Navbar -->
-    <nav
-      class="bg-white bg-opacity-90 backdrop-filter backdrop-blur-lg shadow-md sticky top-0 z-50"
-    >
-      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <nav class="bg-white border-b">
+      <div class="container mx-auto px-4">
         <div class="flex justify-between h-16 items-center">
           <!-- Logo -->
           <a href="/" class="flex items-center space-x-2">
@@ -38,67 +34,48 @@
             <span class="text-xl font-bold text-gray-900">MessageHub</span>
           </a>
 
-          <!-- User Dropdown -->
-          <div class="relative">
-            <button
-              id="userDropdown"
-              class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 focus:outline-none"
-            >
-              <span>UserName</span>
-              <i class="lucide-chevron-down h-4 w-4"></i>
-            </button>
-            <div
-              id="userMenu"
-              class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10"
-            >
-              <a
-                href="#"
-                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              >
-                <i class="lucide-user mr-2 h-4 w-4 inline-block"></i>
-                Profile
-              </a>
-              <a
-                href="#"
-                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              >
-                <i class="lucide-log-out mr-2 h-4 w-4 inline-block"></i>
-                Logout
-              </a>
-            </div>
-          </div>
+          <!-- User Name -->
+          <div class="text-sm text-gray-600">UserName</div>
         </div>
       </div>
     </nav>
 
     <!-- Main Content -->
-    <main class="flex-grow flex flex-col md:flex-row p-4 gap-4">
-      <!-- Left Sidebar - User List (Hidden on small screens) -->
-      <div
-        class="hidden md:block w-full md:w-1/3 bg-white shadow-md rounded-lg overflow-hidden"
+    <main class="flex-grow flex flex-col md:flex-row">
+      <!-- Toggle button for user list on small screens -->
+      <button
+        id="toggleUserList"
+        class="md:hidden fixed bottom-4 left-4 z-50 bg-indigo-600 text-white p-2 rounded-full shadow-lg"
       >
-        <div class="p-4 border-b">
-          <h2 class="text-lg font-semibold">Users</h2>
-          <div class="mt-2 relative">
+        <i class="lucide-users"></i>
+      </button>
+
+      <!-- Left Sidebar - User List -->
+      <div
+        id="userList"
+        class="fixed inset-y-0 left-0 w-full md:w-80 transform -translate-x-full transition-transform duration-200 ease-in-out md:relative md:translate-x-0 bg-gray-50 md:border-r z-40"
+      >
+        <div class="p-4">
+          <h2 class="text-lg mb-4">Users</h2>
+          <div class="relative">
             <input
               type="text"
               placeholder="Search..."
-              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
             />
-            <i class="lucide-search absolute right-3 top-2.5 text-gray-400"></i>
           </div>
         </div>
-        <div class="overflow-y-auto h-[calc(100vh-16rem)]">
-          <!-- Blank user list items -->
-          <div class="p-4 border-b hover:bg-gray-50 cursor-pointer">
+        <div class="overflow-y-auto">
+          <!-- User list item -->
+          <div class="p-4 hover:bg-gray-100 cursor-pointer">
             <div class="flex items-center">
               <img
                 src="/placeholder.svg"
-                alt="USER1"
+                alt="USER"
                 class="w-10 h-10 rounded-full mr-3"
               />
               <div>
-                <h3 class="font-semibold text-gray-500">---</h3>
+                <h3 class="text-gray-500">---</h3>
                 <p class="text-sm text-gray-400">---</p>
               </div>
             </div>
@@ -107,24 +84,22 @@
       </div>
 
       <!-- Right Side - Chat Area -->
-      <div
-        class="w-full md:w-2/3 bg-white shadow-md rounded-lg flex flex-col h-[calc(100vh-10rem)] sm:h-[calc(100vh-12rem)] md:h-[calc(100vh-8rem)]"
-      >
-        <div class="flex-grow overflow-y-auto p-4 space-y-4">
+      <div class="flex-1 flex flex-col bg-white">
+        <div class="flex-grow overflow-y-auto p-4">
           <!-- Messages will be dynamically added here -->
         </div>
-        <div class="p-4 border-t">
-          <form id="messageForm" class="flex space-x-2">
+        <div class="border-t bg-white p-4">
+          <form id="messageForm" class="flex gap-2">
             <input
               type="text"
               placeholder="Type a message..."
-              class="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              class="flex-1 px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
             />
             <button
               type="submit"
-              class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              <span class="text-sm">Send</span>
+              Send
             </button>
           </form>
         </div>
@@ -132,77 +107,51 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-50 border-t mt-auto">
-      <div class="container mx-auto py-4 px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col md:flex-row justify-between items-center">
-          <div class="mb-4 md:mb-0">
-            <p class="text-sm text-gray-500">
-              &copy; 2024 MessageHub. All rights reserved.
-            </p>
-          </div>
-          <div class="flex space-x-6">
-            <a href="#" class="text-gray-400 hover:text-gray-500">
-              <span class="sr-only">Facebook</span>
-              <svg
-                class="h-6 w-6"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </a>
-            <a href="#" class="text-gray-400 hover:text-gray-500">
-              <span class="sr-only">Twitter</span>
-              <svg
-                class="h-6 w-6"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path
-                  d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"
-                />
-              </svg>
-            </a>
-            <a href="#" class="text-gray-400 hover:text-gray-500">
-              <span class="sr-only">GitHub</span>
-              <svg
-                class="h-6 w-6"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.009-.866-.015-1.698-2.782.605-3.374-1.344-3.374-1.344-.454-1.116-.931-1.417-.931-1.417-.76-.519.057-.508.057-.508 1.057.075 1.613 1.091 1.613 1.091.938 1.626 2.46 1.155 3.045.88.092-.679.368-1.155.669-1.421-2.333-.266-4.788-1.168-4.788-5.19 0-1.144.398-2.084 1.052-2.821-.107-.262-.455-1.323-.08-2.749 0 0 .866-.283 2.732 1.04 1.058-.294 2.13-.442 3.22-.448 1.087.006 2.165.154 3.217.448 1.87-1.324 2.731-1.04 2.731-1.04-.377 1.426-.026 2.487-.135 2.749.654.738 1.05 1.678 1.05 2.821 0 4.04-2.46 4.923-4.794 5.186.373.314.707.92.707 1.847 0 1.333-.012 2.412-.012 2.736 0 .266.185.578.688.482 3.977-1.324 6.841-5.079 6.841-9.504C22 6.484 17.523 2 12 2z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </a>
-          </div>
-        </div>
+    <footer class="bg-white border-t py-4">
+      <div class="container mx-auto px-4 text-center">
+        <p class="text-sm text-gray-500">
+          © 2024 MessageHub. All rights reserved.
+        </p>
       </div>
     </footer>
+
     <script>
       // Toggle user menu
       const userDropdown = document.getElementById("userDropdown");
       const userMenu = document.getElementById("userMenu");
-      userDropdown.addEventListener("click", () => {
-        userMenu.classList.toggle("hidden");
+      if (userDropdown && userMenu) {
+        userDropdown.addEventListener("click", () => {
+          userMenu.classList.toggle("hidden");
+        });
+
+        // Close the menu when clicking outside
+        document.addEventListener("click", (event) => {
+          if (
+            !userDropdown.contains(event.target) &&
+            !userMenu.contains(event.target)
+          ) {
+            userMenu.classList.add("hidden");
+          }
+        });
+      }
+
+      // Toggle user list on small screens
+      const toggleUserList = document.getElementById("toggleUserList");
+      const userList = document.getElementById("userList");
+
+      toggleUserList.addEventListener("click", () => {
+        userList.classList.toggle("-translate-x-full");
       });
 
-      // Close the menu when clicking outside
+      // Close user list when clicking outside on small screens
       document.addEventListener("click", (event) => {
+        const isSmallScreen = window.innerWidth < 768; // md breakpoint
         if (
-          !userDropdown.contains(event.target) &&
-          !userMenu.contains(event.target)
+          isSmallScreen &&
+          !userList.contains(event.target) &&
+          event.target !== toggleUserList
         ) {
-          userMenu.classList.add("hidden");
+          userList.classList.add("-translate-x-full");
         }
       });
     </script>
