@@ -57,6 +57,11 @@ REST_FRAMEWORK = {
     ],
 }
 
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:8000",
+]
+CORS_ORIGIN_ALLOW_ALL = False
+
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -69,8 +74,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ORIGIN_ALLOW_ALL = True
 ROOT_URLCONF = 'finalProject.urls'
+
 
 TEMPLATES = [
     {
@@ -90,14 +95,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'finalProject.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql', 
+        'NAME': '120db', 
+        'USER': 'postgres', 
+        'PASSWORD': '1234',  
+        'HOST': 'localhost', 
+        'PORT': '5432',  
     }
 }
 
