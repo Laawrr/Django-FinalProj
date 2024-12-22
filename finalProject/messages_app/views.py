@@ -35,14 +35,12 @@ def message_api(request):
                 }
                 for i, message in enumerate(serializer.data)
             ]
-            print("Serialized data length:", len(serializer.data))
-            print("Decrypted contents length:", len(request.decrypted_contents))
             return Response({'decrypted_content': decrypted_messages}, status=status.HTTP_200_OK)
 
         elif request.method == 'POST':
             # Save the serialized data
             serializer = MessageSerializer(data=request.data)
-            print("asd:",serializer)
+            print("Send Succesfully.")
             if serializer.is_valid():
                 serializer.save(user=request.user)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)

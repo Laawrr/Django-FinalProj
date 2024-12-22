@@ -35,10 +35,9 @@ class EncryptionMiddleware:
         try:
             # Check if the request body is empty
             if not request.body.strip():
-                return request  # Continue without encryption if no body is present
+                return request 
 
             # Decode the request body
-            print("Original body:", request.body)
             parsed_data = json.loads(request.body.decode('utf-8'))
             
             # Encrypt the content if it exists
@@ -46,14 +45,11 @@ class EncryptionMiddleware:
                 parsed_data['content'] = self.cipher.encrypt(parsed_data['content'].encode('utf-8')).decode('utf-8')
                 request._body = json.dumps(parsed_data).encode('utf-8')
                 request._full_data = parsed_data  # Storing the modified data
-            
-            print("Modified body:", request._body)
 
         except json.JSONDecodeError:
             # Skip encryption for malformed or non-JSON payloads
             pass
         except Exception as e:
-            # Log unexpected errors (optional) and continue
             print(f"Unexpected error during encryption: {e}")
         
         return request
@@ -81,7 +77,6 @@ class EncryptionMiddleware:
 
             # Store decrypted content in request for use in views
             request.decrypted_contents = decrypted_contents  # Store in request object
-            print("Middleware decrypted contents:", decrypted_contents)
             
         except Exception as e:
             print("Middleware decryption error:", e)  # Debugging
