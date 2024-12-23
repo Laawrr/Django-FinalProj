@@ -23,25 +23,18 @@
 
 {% block body %}
 <!-- Main Content -->
-<main class="flex-grow flex flex-col md:flex-row">
-  <!-- Toggle button for user list on small screens -->
-  <button id="toggleUserList"
-    class="md:hidden fixed bottom-4 left-4 z-50 bg-indigo-600 text-white p-2 rounded-full shadow-lg">
-    <i class="lucide-users"></i>
-  </button>
-
-
-  <!-- Right Side - Chat Area -->
-  <div class="flex-1 flex flex-col bg-white">
-    <div id="messageContainer" class="flex-grow overflow-y-auto p-4">
+<main class="flex-grow flex justify-center items-start p-4">
+  <div class="w-full max-w-2xl bg-white shadow-md rounded-lg flex flex-col h-[calc(100vh-10rem)] sm:h-[calc(100vh-12rem)] md:h-[calc(100vh-8rem)]">
+    <div id="messageContainer" class="flex-grow overflow-y-auto p-4 space-y-4">
       {% if not messages %}
       <p class="text-gray-500 text-center">No messages yet. Start the conversation!</p>
       {% else %}
       {% for message in messages %}
-      <div class="message p-2 border-b {% if message.user == user %}text-right{% else %}text-left{% endif %}">
-        <strong>{{ message.user.username }}:</strong>
-        <p>{{ message.content }}</p>
-        <span class="text-gray-500 text-xs">{{ message.timestamp }}</span>
+      <div class="message flex flex-col space-y-1 {% if message.user == user %}items-end{% else %}items-start{% endif %}">
+        <div class="{% if message.user == user %}bg-indigo-100 text-indigo-800{% else %}bg-gray-100 text-gray-800{% endif %} rounded-lg py-2 px-4 max-w-[70%]">
+          <p><strong class="text-indigo-600">{{ message.user.username }}:</strong> {{ message.content }}</p>
+        </div>
+        <span class="text-xs text-gray-400">{{ message.timestamp }}</span>
       </div>
       {% endfor %}
       {% endif %}
@@ -49,132 +42,112 @@
     <div class="border-t bg-white p-4">
       <form id="messageForm" class="flex gap-2">
         {% csrf_token %}
-        <input type="text" name="content"
-        class="flex-1 px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-          placeholder="Type a message..." />
+        <input type="text" name="content" placeholder="Type a message..."
+          class="flex-1 px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500" />
         <button type="submit"
-        class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-        Send</span>
+          class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+          Send
         </button>
       </form>
     </div>
   </div>
 </main>
+
 <script>
- // Toggle user menu
- const userDropdown = document.getElementById("userDropdown");
-      const userMenu = document.getElementById("userMenu");
-      if (userDropdown && userMenu) {
-        userDropdown.addEventListener("click", () => {
-          userMenu.classList.toggle("hidden");
-        });
+  // Toggle user menu
+  const userDropdown = document.getElementById("userDropdown");
+  const userMenu = document.getElementById("userMenu");
+  if (userDropdown && userMenu) {
+    userDropdown.addEventListener("click", () => {
+      userMenu.classList.toggle("hidden");
+    });
 
-        // Close the menu when clicking outside
-        document.addEventListener("click", (event) => {
-          if (
-            !userDropdown.contains(event.target) &&
-            !userMenu.contains(event.target)
-          ) {
-            userMenu.classList.add("hidden");
-          }
-        });
+    // Close the menu when clicking outside
+    document.addEventListener("click", (event) => {
+      if (
+        !userDropdown.contains(event.target) &&
+        !userMenu.contains(event.target)
+      ) {
+        userMenu.classList.add("hidden");
       }
+    });
+  }
 
-      // Toggle user list on small screens
-      const toggleUserList = document.getElementById("toggleUserList");
-      const userList = document.getElementById("userList");
+  document.addEventListener('DOMContentLoaded', function () {
+    // Fetch messages only for the current user (authenticated user)
+    fetchMessages();
 
-      toggleUserList.addEventListener("click", () => {
-        userList.classList.toggle("-translate-x-full");
-      });
+    function fetchMessages() {
+      fetch("{% url 'message-api' %}")
+        .then(response => response.json())
+        .then(data => {
+          // Extract the decrypted content array
+          const messages = Array.isArray(data.decrypted_content) ? data.decrypted_content : [];
 
-      // Close user list when clicking outside on small screens
-      document.addEventListener("click", (event) => {
-        const isSmallScreen = window.innerWidth < 768; // md breakpoint
-        if (
-          isSmallScreen &&
-          !userList.contains(event.target) &&
-          event.target !== toggleUserList
-        ) {
-          userList.classList.add("-translate-x-full");
-        }
-      });
+          const messageContainer = document.getElementById("messageContainer");
 
-      document.addEventListener('DOMContentLoaded', function () {
-  // Fetch messages only for the current user (authenticated user)
-  fetchMessages();
-
-  function fetchMessages() {
-    fetch("{% url 'message-api' %}")
-      .then(response => response.json())
-      .then(data => {
-        // Extract the decrypted content array
-        const messages = Array.isArray(data.decrypted_content) ? data.decrypted_content : [];
-
-        const messageContainer = document.getElementById("messageContainer");
-
-        if (messages.length === 0) {
-          messageContainer.innerHTML = "<p class='text-gray-500 text-center'>No messages yet. Start the conversation!</p>";
-        } else {
-          messageContainer.innerHTML = "";  // Clear existing messages
-          messages.forEach(message => {
-            const messageElement = document.createElement("div");
-            messageElement.classList.add("message", "p-2", "border-b", message.user === '{{ user.username }}' ? 'text-right' : 'text-left');
-            messageElement.innerHTML = `
+          if (messages.length === 0) {
+            messageContainer.innerHTML = "<p class='text-gray-500 text-center'>No messages yet. Start the conversation!</p>";
+          } else {
+            messageContainer.innerHTML = "";  // Clear existing messages
+            messages.forEach(message => {
+              const messageElement = document.createElement("div");
+              messageElement.classList.add("message", "p-2", "border-b", message.user === '{{ user.username }}' ? 'text-right' : 'text-left');
+              messageElement.innerHTML = `
               <strong>${message.user}:</strong>
               <p>${message.content}</p>
               <span class="text-gray-500 text-xs">${message.timestamp}</span>
             `;
-            messageContainer.appendChild(messageElement);
-          });
-        }
+              messageContainer.appendChild(messageElement);
+            });
+          }
 
-        // Scroll to the bottom of the message container after updating messages
-        setTimeout(() => {
-          messageContainer.scrollTop = messageContainer.scrollHeight;
-        }, 0);
-      })
-      .catch(error => {
-        console.error('Error fetching messages:', error);
-      });
-  }
-
-  // Handle message form submission as JSON
-  document.getElementById('messageForm').addEventListener('submit', function (event) {
-    event.preventDefault(); // Prevent default form submission
-
-    const content = document.querySelector('input[name="content"]').value;
-
-    // Check if content is empty
-    if (!content.trim()) {
-      alert("Message cannot be empty!");
-      return;
+          // Scroll to the bottom of the message container after updating messages
+          setTimeout(() => {
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+          }, 0);
+        })
+        .catch(error => {
+          console.error('Error fetching messages:', error);
+        });
     }
 
-    const data = {
-      content: content
-    };
+    // Handle message form submission as JSON
+    document.getElementById('messageForm').addEventListener('submit', function (event) {
+      event.preventDefault(); // Prevent default form submission
 
-    fetch("{% url 'message-api' %}", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": document.querySelector('[name="csrfmiddlewaretoken"]').value, // Include CSRF token
-      },
-      body: JSON.stringify(data)
-    })
-      .then(response => response.json())
-      .then(data => {
-        // console.log('Message sent:', data);
-        fetchMessages();  // Fetch updated messages
-        // Clear the input field after sending the message
-        document.querySelector('input[name="content"]').value = '';
+      const content = document.querySelector('input[name="content"]').value;
+
+      // Check if content is empty
+      if (!content.trim()) {
+        alert("Message cannot be empty!");
+        return;
+      }
+
+      const data = {
+        content: content
+      };
+
+      fetch("{% url 'message-api' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": document.querySelector('[name="csrfmiddlewaretoken"]').value, // Include CSRF token
+        },
+        body: JSON.stringify(data)
       })
-      .catch(error => {
-        console.error('Error sending message:', error);
-      });
+        .then(response => response.json())
+        .then(data => {
+          // console.log('Message sent:', data);
+          fetchMessages();  // Fetch updated messages
+          // Clear the input field after sending the message
+          document.querySelector('input[name="content"]').value = '';
+        })
+        .catch(error => {
+          console.error('Error sending message:', error);
+        });
+    });
   });
-});
 
 </script>
 
