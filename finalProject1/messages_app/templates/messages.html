@@ -111,8 +111,6 @@
             function capitalizeFirstLetter(string) {
               return string.charAt(0).toUpperCase() + string.slice(1);
             }
-
-
           }
 
           // Scroll to the bottom of the message container after updating messages
@@ -168,8 +166,50 @@
 
     // Fetch messages initially
     fetchMessages();
-  });
 
+    // WebSocket setup
+    let url = `ws://${window.location.host}/ws/socket-server/`;
+    const chatSocket = new WebSocket(url);
+
+    chatSocket.onmessage = function (e) {
+      let data = JSON.parse(e.data);
+      console.log('Data:', data);
+
+      if (data.type === 'chat') {
+        let messageElement = document.createElement("div");
+        messageElement.classList.add("message", "flex", "flex-col", "space-y-1", "items-start");
+
+        let messageBubble = document.createElement("div");
+        messageBubble.classList.add("bg-gray-100", "text-gray-800", "rounded-lg", "py-2", "px-4", "max-w-[70%]");
+        messageBubble.innerHTML = `<p><strong class="text-indigo-600">${data.user}:</strong> ${data.message}</p>`;
+
+        let timestamp = document.createElement("span");
+        timestamp.classList.add("text-gray-500", "text-xs");
+        timestamp.textContent = new Date().toLocaleTimeString();
+
+        messageElement.appendChild(messageBubble);
+        messageElement.appendChild(timestamp);
+
+        messageContainer.appendChild(messageElement);
+
+        // Scroll to the bottom of the message container after updating messages
+        requestAnimationFrame(() => {
+          messageContainer.scrollTop = messageContainer.scrollHeight;
+        });
+      }
+    };
+
+    let form = document.getElementById('messageForm');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      let message = e.target.content.value;
+      chatSocket.send(JSON.stringify({
+        'message': message,
+        'user': currentUser
+      }));
+      form.reset();
+    });
+  });
 </script>
 
 {% endblock %}

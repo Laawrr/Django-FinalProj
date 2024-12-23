@@ -33,6 +33,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
+    'channels',  
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -93,8 +95,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'finalProject1.wsgi.application'
-
+#WSGI_APPLICATION = 'finalProject1.wsgi.application'
+ASGI_APPLICATION = 'finalProject1.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
@@ -103,12 +105,17 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql', 
         'NAME': '120db', 
         'USER': 'postgres', 
-        'PASSWORD': '1234',  
+        'PASSWORD': '1031',  
         'HOST': 'localhost', 
         'PORT': '5432',  
     }
 }
 
+CHANNEL_LAYERS = {
+    'default':{
+        'BACKEND':'channels.layers.InMemoryChannelLayer'
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
