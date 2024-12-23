@@ -57,6 +57,22 @@
 </main>
 
 <script>
+  const userDropdown = document.getElementById("userDropdown");
+  const userMenu = document.getElementById("userMenu");
+
+  if (userDropdown && userMenu) {
+    userDropdown.addEventListener("click", (event) => {
+      event.stopPropagation(); // Prevent the click event from propagating
+      userMenu.classList.toggle("hidden"); // Toggle visibility
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!userDropdown.contains(event.target) && !userMenu.contains(event.target)) {
+        userMenu.classList.add("hidden"); // Hide the menu if clicked outside
+      }
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     const currentUser = "{{ user.username }}"; // Dynamically set from template
     const messageContainer = document.getElementById("messageContainer");
