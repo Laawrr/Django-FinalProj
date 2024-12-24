@@ -106,5 +106,3 @@ Start the server for `finalProject1`:
 ---
 
 Follow these steps to set up and run the Django Final Project successfully.
-
-3
